@@ -34,10 +34,10 @@ class TestKMeans(unittest.TestCase):
         self.assertIsNotNone(self.kmeans.clusters)
         self.assertEqual(self.kmeans.centroids.shape, (2,))
 
-    def test_detect_anomalies(self):
+    def test_detect(self):
         """Test detecting anomalies based on distance to centroids."""
         self.kmeans.fit(self.data)
-        anomalies = self.kmeans.detect_anomalies(self.data)
+        anomalies = self.kmeans.detect(self.data)
         # Check if any anomalies were detected
         self.assertTrue(len(anomalies) > 0)
         # Check if the detected anomaly is 18

@@ -16,7 +16,7 @@ for company, group in groupby(sorted_data, key=KMeans.keyfunc):
     prices = np.array([item[1] for item in group])
     if len(prices) > 2:
         kmeans_class_obj.fit(prices)
-        anomalies_kmeans = kmeans_class_obj.detect_anomalies(prices)
+        anomalies_kmeans = kmeans_class_obj.detect(prices)
         results[company] = anomalies_kmeans.tolist()
 
 display_results = dict(results)

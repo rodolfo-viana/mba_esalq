@@ -11,6 +11,7 @@ class KMeans:
     KMeans clustering class with enhanced convergence criteria.
 
     Attributes:
+        feature (str): Feature name in dataset.
         k (int): Number of clusters.
         max_iters (int): Maximum number of iterations for KMeans.
         tolerance (float): Convergence tolerance based on centroid movement.
@@ -20,6 +21,7 @@ class KMeans:
 
     # TODO: Think of a way to pick `k` dinamically (elbow method, perhaps?)
     def __init__(self,
+                 feature: str = None,
                  k: int = 2,
                  max_iters: int = 100,
                  tolerance: float = 1e-4,
@@ -28,6 +30,7 @@ class KMeans:
         """
         Initialize KMeans with specified parameters.
         """
+        self.feature = feature
         self.k = k
         self.max_iters = max_iters
         self.tolerance = tolerance
@@ -48,9 +51,9 @@ class KMeans:
         """
         centroids = [data[np.random.choice(len(data))]]
         for _ in range(1, k):
-            squared_distances = np.array(
+            squared_dist = np.array(
                 [min([math.pow(c-x, 2) for c in centroids]) for x in data])
-            probs = squared_distances / squared_distances.sum()
+            probs = squared_dist / squared_dist.sum()
             cumulative_probs = probs.cumsum()
             r = np.random.rand()
             for j, p in enumerate(cumulative_probs):
@@ -76,8 +79,8 @@ class KMeans:
         previous_centroids = np.zeros_like(centroids)
 
         for _ in range(self.max_iters):
-            distances = np.abs(data[:, np.newaxis] - centroids)
-            clusters = np.argmin(distances, axis=1)
+            dist = np.abs(data[:, np.newaxis] - centroids)
+            clusters = np.argmin(dist, axis=1)
             new_centroids = np.array(
                 [data[clusters == i].mean() for i in range(self.k)])
 
@@ -88,9 +91,9 @@ class KMeans:
             previous_centroids = centroids.copy()
             centroids = new_centroids
 
-        current_distance = np.sum(
+        current_dist = np.sum(
             [np.abs(data[clusters == i] - centroids[i]).sum() for i in range(self.k)])
-        return centroids, clusters, current_distance
+        return centroids, clusters, current_dist
 
     def fit(self, data: np.ndarray) -> None:
         """
@@ -101,19 +104,19 @@ class KMeans:
         """
         best_centroids = None
         best_clusters = None
-        min_distance = np.inf
+        min_dist = np.inf
 
         for _ in range(self.n_init):
-            centroids, clusters, distance = self._single_iter(data)
-            if distance < min_distance:
-                min_distance = distance
+            centroids, clusters, dist = self._single_iter(data)
+            if dist < min_dist:
+                min_dist = dist
                 best_centroids = centroids
                 best_clusters = clusters
 
         self.centroids = best_centroids
         self.clusters = best_clusters
 
-    def detect_anomalies(self, data: np.ndarray) -> np.ndarray:
+    def detect(self, data: np.ndarray) -> np.ndarray:
         """
         Detect anomalies in the data based on the distance to the nearest centroid.
 
@@ -123,10 +126,10 @@ class KMeans:
         Returns:
             array-like: Detected anomalies.
         """
-        distances = np.array([math.fabs(price - self.centroids[cluster])
-                             for price, cluster in zip(data, self.clusters)])
-        threshold = np.percentile(distances, self.threshold_percentile)
-        anomalies = data[distances > threshold]
+        dist = np.array([math.fabs(self.feature - self.centroids[cluster])
+                             for self.feature, cluster in zip(data, self.clusters)])
+        threshold = np.percentile(dist, self.threshold_percentile)
+        anomalies = data[dist > threshold]
         return anomalies
 
     @staticmethod
