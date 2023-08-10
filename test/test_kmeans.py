@@ -1,51 +1,57 @@
+import numpy as np
+import unittest
+from src.kmeans import KMeans
 import sys
 sys.path.append('../src')
-from src.kmeans import KMeans
-import unittest
-import numpy as np
 
 class TestKMeans(unittest.TestCase):
 
     def setUp(self):
-        """Set up a sample dataset and KMeans object for testing."""
-        self.data = np.array([10, 12, 10, 11, 18, 55, 56, 57])
-        self.kmeans = KMeans()
+        self.data = np.array([
+            [1, 12],
+            [5, 16],
+            [1, 8],
+            [5, 2],
+            [8, 20],
+            [9, 9]
+        ])
 
     def test_initialization(self):
-        """Test initialization of the KMeans object with default and custom parameters."""
-        self.assertEqual(self.kmeans.k, 2)
-        self.assertEqual(self.kmeans.max_iters, 100)
-        self.assertEqual(self.kmeans.tol, 1e-4)
-        
-        custom_kmeans = KMeans(k=3, max_iters=50, tol=1e-3)
-        self.assertEqual(custom_kmeans.k, 3)
-        self.assertEqual(custom_kmeans.max_iters, 50)
-        self.assertEqual(custom_kmeans.tol, 1e-3)
+        kmeans = KMeans(k=3, max_iters=50, tol=1e-3, n_init=10, threshold=90)
+        self.assertEqual(kmeans.k, 3)
+        self.assertEqual(kmeans.max_iters, 50)
+        self.assertEqual(kmeans.tol, 1e-3)
+        self.assertEqual(kmeans.n_init, 10)
+        self.assertEqual(kmeans.threshold, 90)
 
     def test_kpp_init(self):
-        """Test centroid initialization using the k-means++ method."""
-        centroids = self.kmeans._kpp_init(self.data, 2)
-        self.assertEqual(centroids.shape, (2,))
+        kmeans = KMeans()
+        centroids = kmeans._kpp_init(self.data, 2)
+        self.assertEqual(centroids.shape, (2, 2))
+        self.assertNotEqual(tuple(centroids[0]), tuple(centroids[1]))
+
+    def test_single_run(self):
+        kmeans = KMeans()
+        centroids, labels, inertia = kmeans._single_run(self.data)
+        self.assertEqual(centroids.shape, (2, 2))
+        self.assertEqual(labels.shape, (len(self.data),))
+        self.assertTrue(isinstance(inertia, float))
 
     def test_fit(self):
-        """Test fitting the KMeans algorithm to sample data."""
-        self.kmeans.fit(self.data)
-        self.assertIsNotNone(self.kmeans.centroids)
-        self.assertIsNotNone(self.kmeans.clusters)
-        self.assertEqual(self.kmeans.centroids.shape, (2,))
+        kmeans = KMeans()
+        kmeans.fit(self.data)
+        self.assertIsNotNone(kmeans.centroids)
+        self.assertEqual(kmeans.centroids.shape, (2, 2))
+        self.assertEqual(len(kmeans.labels), len(self.data))
 
     def test_detect(self):
-        """Test detecting anomalies based on distance to centroids."""
-        self.kmeans.fit(self.data)
-        anomalies = self.kmeans.detect(self.data)
-        # Check if any anomalies were detected
-        self.assertTrue(len(anomalies) > 0)
-        # Check if the detected anomaly is 18
-        self.assertEqual(anomalies[0], 18)
-
-    def tearDown(self):
-        """Tear down the test setup."""
-        self.data = None
-        self.kmeans = None
+        kmeans = KMeans()
+        kmeans.fit(self.data)
+        anomalies = kmeans.detect(self.data)
+        self.assertTrue(isinstance(anomalies, np.ndarray))
+        self.assertIn(5, anomalies)
+        self.assertNotIn(1, anomalies)
 
 
+if __name__ == "__main__":
+    unittest.main()
