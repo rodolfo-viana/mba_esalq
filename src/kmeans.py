@@ -14,9 +14,9 @@ class KMeans:
         feature (str): Feature name in dataset.
         k (int): Number of clusters.
         max_iters (int): Maximum number of iterations for KMeans.
-        tolerance (float): Convergence tolerance based on centroid movement.
+        tol (float): Convergence tolerance based on centroid movement.
         n_init (int): Number of times the k-means algorithm will be run with different centroid seeds.
-        threshold_percentile (int): Percentile for anomaly detection.
+        threshold (int): Percentile for anomaly detection.
     """
 
     # TODO: Think of a way to pick `k` dinamically (elbow method, perhaps?)
@@ -24,18 +24,18 @@ class KMeans:
                  feature: str = None,
                  k: int = 2,
                  max_iters: int = 100,
-                 tolerance: float = 1e-4,
+                 tol: float = 1e-4,
                  n_init: int = 30,
-                 threshold_percentile: int = 95):
+                 threshold: int = 95):
         """
         Initialize KMeans with specified parameters.
         """
         self.feature = feature
         self.k = k
         self.max_iters = max_iters
-        self.tolerance = tolerance
+        self.tol = tol
         self.n_init = n_init
-        self.threshold_percentile = threshold_percentile
+        self.threshold = threshold
 
     @staticmethod
     def _kpp_init(data: np.ndarray, k: int) -> np.ndarray:
@@ -85,7 +85,7 @@ class KMeans:
                 [data[clusters == i].mean() for i in range(self.k)])
 
             centroid_shift = np.linalg.norm(new_centroids - previous_centroids)
-            if centroid_shift < self.tolerance:
+            if centroid_shift < self.tol:
                 break
 
             previous_centroids = centroids.copy()
@@ -128,7 +128,7 @@ class KMeans:
         """
         dist = np.array([math.fabs(self.feature - self.centroids[cluster])
                              for self.feature, cluster in zip(data, self.clusters)])
-        threshold = np.percentile(dist, self.threshold_percentile)
+        threshold = np.percentile(dist, self.threshold)
         anomalies = data[dist > threshold]
         return anomalies
 

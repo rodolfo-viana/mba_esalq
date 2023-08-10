@@ -15,12 +15,12 @@ class TestKMeans(unittest.TestCase):
         """Test initialization of the KMeans object with default and custom parameters."""
         self.assertEqual(self.kmeans.k, 2)
         self.assertEqual(self.kmeans.max_iters, 100)
-        self.assertEqual(self.kmeans.tolerance, 1e-4)
+        self.assertEqual(self.kmeans.tol, 1e-4)
         
-        custom_kmeans = KMeans(k=3, max_iters=50, tolerance=1e-3)
+        custom_kmeans = KMeans(k=3, max_iters=50, tol=1e-3)
         self.assertEqual(custom_kmeans.k, 3)
         self.assertEqual(custom_kmeans.max_iters, 50)
-        self.assertEqual(custom_kmeans.tolerance, 1e-3)
+        self.assertEqual(custom_kmeans.tol, 1e-3)
 
     def test_kpp_init(self):
         """Test centroid initialization using the k-means++ method."""
