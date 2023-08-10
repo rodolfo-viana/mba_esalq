@@ -1,6 +1,4 @@
-### Detecção de anomalias em gastos dos deputados estaduais com K-Means [*WIP*]
-
-#### MBA de Data Science e Analytics, Esalq-USP
+## Detecção de anomalias em gastos dos deputados estaduais com K-Means [*WIP*]
 
 ---
 
