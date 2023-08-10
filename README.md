@@ -1,8 +1,6 @@
 ## Detecção de anomalias em gastos dos deputados estaduais com K-Means [*WIP*]
 
----
-
-#### Introdução
+### Introdução
 
 Cada um dos 94 parlamentares da Assembleia Legislativa do Estado de São Paulo [Alesp] tem direito aos Auxílio-Encargos Gerais de Gabinete de Deputado e Auxílio-Hospedagem, referenciados conjuntamente como “verba de gabinete”. Tal direito foi conferido pela resolução 783, artigo 11, de 1º de julho de 1997[^1]. Trata-se de um valor mensal devido pelo Estado aos deputados a fim de que eles possam cobrir gastos com o funcionamento e manutenção dos gabinetes, com hospedagem e demais despesas inerentes ao pleno exercício das atividades parlamentares. 
 
@@ -14,7 +12,7 @@ Tais somas de recursos públicos podem servir, ainda que parcialmente, para infr
 
 Com este contexto, o presente trabalho busca ser um instrumento para avaliação de malversação de dinheiro público por meio de aprendizado de máquina não supervisionado. O objetivo desta peça não é afirmar peremptoriamente se determinada despesa é fraudulenta ou não; seu escopo é servir de ferramenta para uma observação inicial dos gastos, que podem ser analisados por meio de clusterização, onde se objetiva encontrar um grupo de despesas cujos valores são indicativos de possíveis anomalias.
 
-#### Métodos 
+### Métodos 
 
 A primeira etapa consiste na captura, limpeza e normalização de dados relacionados às despesas dos deputados. Tais registros estão disponíveis no Portal de Dados Abertos da Alesp, e datam desde 2002. A estrutura dos arquivos, tais como cabeçalhos e nomenclaturas de tipos de despesas, sofreram alterações no decorrer dos anos, sendo necessárias transformações para torná-los homogêneos.
 
