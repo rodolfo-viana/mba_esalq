@@ -1,4 +1,4 @@
-## Detecção de anomalias em gastos dos deputados estaduais com K-Means [*WIP*]
+# Detecção de anomalias em gastos dos deputados estaduais com K-Means [*WIP*]
 
 ### Introdução
 
