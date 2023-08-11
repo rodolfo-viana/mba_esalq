@@ -24,7 +24,7 @@ class KMeans:
                  centroids: np.ndarray = None
                  ):
         """
-        Initialize k-means with specified parameters
+        Initialize k-means with specified parameters.
         """
         self.k = k
         self.max_iters = max_iters
@@ -43,7 +43,7 @@ class KMeans:
             k (int): Number of desired centroids.
 
         Returns:
-            np.ndarray: Initialized centroids.
+            centroids (np.ndarray): Initialized centroids.
         """
         centroids = [data[np.random.choice(len(data))]]
         for _ in range(1, k):
@@ -62,14 +62,14 @@ class KMeans:
             data (np.ndarray): Input data.
 
         Returns:
-            np.ndarray: Best centroids after running k-means.
-            np.ndarray: Cluster assignments for each data point.
-            float: Total distance of data points from their assigned centroids.
+            centroids (np.ndarray): Best centroids after running k-means.
+            labels (np.ndarray): Cluster assignments for each data point.
+            inertia (float): Total distance of data points from their assigned centroids.
         """
         centroids = self._kpp_init(data, self.k)
         for _ in range(self.max_iters):
-            distances = np.linalg.norm(data[:, np.newaxis] - centroids, axis=2)
-            labels = np.argmin(distances, axis=1)
+            dist = np.linalg.norm(data[:, np.newaxis] - centroids, axis=2)
+            labels = np.argmin(dist, axis=1)
             new_centroids = np.array(
                 [data[labels == i].mean(axis=0) for i in range(self.k)])
 
@@ -113,10 +113,10 @@ class KMeans:
             data (np.ndarray): Input data.
 
         Returns:
-            np.ndarray: Detected anomalies.
+            anomalies (np.ndarray): Detected anomalies.
         """
-        distances = np.min(np.linalg.norm(
+        dist = np.min(np.linalg.norm(
             data[:, np.newaxis] - self.centroids, axis=2), axis=1)
-        threshold = np.percentile(distances, self.threshold)
-        anomalies = data[distances > threshold]
+        threshold = np.percentile(dist, self.threshold)
+        anomalies = data[dist > threshold]
         return anomalies

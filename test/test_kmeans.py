@@ -1,8 +1,9 @@
-import numpy as np
 import unittest
-from src.kmeans import KMeans
 import sys
-sys.path.append('../src')
+sys.path.insert(0, "..")
+import numpy as np
+from src.kmeans import KMeans
+
 
 class TestKMeans(unittest.TestCase):
 
