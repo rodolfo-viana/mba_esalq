@@ -34,6 +34,8 @@ A inicialização por K-Means++ segue os seguintes passos:
 
 4. Repetição dos passos 2 e 3 até que os centros $k$ sejam escolhidos.
 
+https://github.com/rodolfo-viana/mba_esalq/blob/main/data/centroids_animation.mp4
+
 Aplicada aos dados de despesas dos deputados estaduais, esta metodologia permitirá agrupar aquelas que, segundo o valor, requerem investigação mais apurada por parte dos órgãos de controle. 
 
 [^1]: Assembleia Legislativa do Estado de São Paulo [Alesp]. 1997. Resolução n. 783, de 1° de julho de 1997. Altera a Resolução n° 776, de 14/10/1996, que implantou a nova estrutura administrativa, cria o Núcleo de Qualidade e institui a verba de gabinete. Disponível em: https://www.al.sp.gov.br/repositorio/legislacao/resolucao.alesp/1997/original-resolucao.alesp-783-01.07.1997.html. Acesso em: 19 março 2023.
