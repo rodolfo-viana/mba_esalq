@@ -7,13 +7,11 @@ import numpy as np
 import pandas as pd
 
 # Read dataset
-df = pd.read_csv("../data/2013_2022_corrigido.csv")
+df = pd.read_csv("../data/2018_2022_corrigido.csv")
 # Remove null CNPJ
 df = df[df['CNPJ'].notnull()]
 # Convert CNPJ to str
 df['CNPJ'] = df['CNPJ'].astype(str)
-# Filter data for 2022
-df = df[df['Data'].str.startswith('2022')]
 # Remove unnecessary columns
 df = df[['CNPJ', 'Valor_corrigido']]
 
