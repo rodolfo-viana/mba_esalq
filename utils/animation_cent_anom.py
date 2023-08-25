@@ -30,6 +30,7 @@ class AnimatedKMeans(KMeans):
         return centroids, labels, inertia
 
 df = pd.read_csv("../data/2018_2022_corrigido.csv")
+df = df[df['Data'].str.contains('2021|2022', na=False)]
 df = df[df['CNPJ'].notnull()]
 df['CNPJ'] = df['CNPJ'].astype(str)
 df = df[['CNPJ', 'Valor_corrigido']]
@@ -84,4 +85,4 @@ fig, ax = plt.subplots(figsize=(10, 5))
 fig.suptitle('Centroids movement in custom k-means algorithm for univariate data', fontweight='bold')
 ani_multiple = animation.FuncAnimation(fig, animate_multiple_centroids, frames=len(kmeans_class_objs[0].centroid_history), repeat=True)
 plt.close(fig)
-ani_multiple.save("../assets/anomalies_animation.mp4", writer='ffmpeg', fps=10)
+ani_multiple.save("../assets/anomalies_animation2.mp4", writer='ffmpeg', fps=10)
