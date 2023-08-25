@@ -75,7 +75,11 @@ def animate_multiple_centroids(i):
             anomalies = results[selected_cnpjs[idx]]
             ax.scatter(anomalies, [idx + 1] * len(anomalies), c='blue', marker='s', s=50, alpha=0.7)
             
-    ax.set_title(fr"$k=2$, iteration {i}")
+    if i < len(kmeans_class_objs[0].centroid_history) - 20:
+        ax.set_title(fr"$k=2$, iteration {i}")
+    else:
+        ax.set_title(fr"$k=2$, iteration {len(kmeans_class_objs[0].centroid_history) - 21}")
+    
     ax.set_yticks(range(1, len(selected_cnpjs) + 1))
     ax.set_xlabel("values")
     ax.set_ylabel("companies")
@@ -85,4 +89,4 @@ fig, ax = plt.subplots(figsize=(10, 5))
 fig.suptitle('Centroids movement in custom k-means algorithm for univariate data', fontweight='bold')
 ani_multiple = animation.FuncAnimation(fig, animate_multiple_centroids, frames=len(kmeans_class_objs[0].centroid_history), repeat=True)
 plt.close(fig)
-ani_multiple.save("../assets/anomalies_animation2.mp4", writer='ffmpeg', fps=10)
+ani_multiple.save("../assets/anomalies_animation.mp4", writer='ffmpeg', fps=10)
