@@ -120,3 +120,74 @@ class KMeans:
         threshold = np.percentile(dist, self.threshold)
         anomalies = data[dist > threshold]
         return anomalies
+
+    def get_labels(self, data: np.ndarray) -> np.ndarray:
+        """
+        Assign each data point to the nearest centroid to determine its cluster label.
+
+        Args:
+            data (np.ndarray): The dataset for which cluster labels are to be determined.
+
+        Returns:
+            np.ndarray: Array of cluster labels corresponding to each data point.
+        """
+        dist = np.linalg.norm(data[:, np.newaxis] - self.centroids, axis=2)
+        labels = np.argmin(dist, axis=1)
+        return labels
+
+
+class Score:
+    """
+    A class to compute scores for clustering algorithm.
+    """
+
+    @staticmethod
+    def silhouette(data: np.ndarray, labels: np.ndarray) -> float:
+        """
+        Compute the Silhouette Score.
+
+        Args:
+            data (np.ndarray): Input data.
+            labels (np.ndarray): Cluster assignments for each data point.
+
+        Returns:
+            float: The computed Silhouette Score.
+        """
+        unique_labels = np.unique(labels)
+        silhouette_vals = []
+
+        for index, label in enumerate(labels):
+            same_cluster = data[labels == label]
+            a = np.mean(np.linalg.norm(same_cluster - data[index], axis=1))
+            other_clusters = [data[labels == other_label]
+                              for other_label in unique_labels if other_label != label]
+            b_vals = [np.mean(np.linalg.norm(cluster - data[index], axis=1))
+                      for cluster in other_clusters]
+            b = min(b_vals)
+            silhouette_vals.append((b - a) / max(a, b))
+
+        return np.mean(silhouette_vals)
+
+    @staticmethod
+    def daviesbouldin(data: np.ndarray, labels: np.ndarray) -> float:
+        """
+        Compute the Davies-Bouldin Score.
+
+        Args:
+            data (np.ndarray): Input data.
+            labels (np.ndarray): Cluster assignments for each data point.
+
+        Returns:
+            float: The computed Davies-Bouldin Score.
+        """
+        unique_labels = np.unique(labels)
+        centroids = np.array([data[labels == label].mean(axis=0)
+                             for label in unique_labels])
+        S = np.array([np.mean(np.linalg.norm(
+            data[labels == label] - centroids[label], axis=1)) for label in unique_labels])
+        D = np.linalg.norm(centroids[:, np.newaxis] - centroids, axis=2)
+        np.fill_diagonal(D, float('inf'))
+
+        R = (S[:, np.newaxis] + S) / D
+        max_R = np.max(R, axis=1)
+        return np.mean(max_R)
