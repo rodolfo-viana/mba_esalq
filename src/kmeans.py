@@ -1,5 +1,6 @@
 from typing import Tuple
 import numpy as np
+import pandas as pd
 
 
 class KMeans:
@@ -185,18 +186,29 @@ class KMeans:
         anomalies = data[dist > threshold]
         return anomalies
 
-    def get_labels(self, data: np.ndarray) -> np.ndarray:
-        """
-        Atribui cada ponto de dado ao centroide mais próximo para
-        determinar seu cluster.
 
-        Argumentos:
-            data (np.ndarray): Conjunto de dados.
+def run_kmeans(group: pd.DataFrame, num_var: str) -> pd.DataFrame:
+    """
+    Executa o algoritmo de K-Means em CNPJ único e adiciona informações
+    sobre quais valores são observados como anomalias e quantos k foram
+    usados para obter tal resultado.
 
-        Retorna:
-            np.ndarray: Array de labels de cluster correspondentes a
-                cada ponto de dado.
-        """
-        dist = np.linalg.norm(data[:, np.newaxis] - self.centroids, axis=2)
-        labels = np.argmin(dist, axis=1)
-        return labels
+    Argumentos:
+        group (pd.DataFrame): Grupo de CNPJs elegíveis para o algoritmo.
+        num_var (str): Nome da variável numérica sobre a qual o
+            algoritmo será rodado.
+
+    Retorna:
+        (pd.DataFrame): Dataframe com os dados originais e as colunas
+            'Anomalia' (com valor 0 para não anomalia e 1 para anomalia)
+            e 'k' (o número ideal de clusters usados pelo K-Means).
+    """
+    kmeans = KMeans()
+    data = group[num_var].values.reshape(-1, 1)
+    k_optimal = kmeans.get_optimal_k(data)
+    kmeans.k = k_optimal
+    kmeans.fit(data)
+    anomalies = kmeans.detect(data).flatten()
+    group["Anomalia"] = group[num_var].isin(anomalies).astype(int)
+    group["k"] = k_optimal
+    return group
