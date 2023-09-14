@@ -1,6 +1,5 @@
 from typing import Tuple
 import numpy as np
-import pandas as pd
 
 
 class KMeans:
@@ -61,59 +60,28 @@ class KMeans:
 
     def get_optimal_k(self, data: np.ndarray, k_max: int = 10) -> int:
         """
-        Determina o número ideal de clusters k com o método Silhouette.
+        Aplica método Elbow para obter o número de clsuters ideal.
 
         Argumentos:
-            data (np.ndarray): Dados sobre os quais o número ideal de k
-                será determinado.
-            k_max (int, opcional): Valor máximo de k. Valor padrão: 10.
+            data (np.ndarray): Dados usados no algoritmo K-Means.
+            k_max (int): Número máximo de clusters. Valor-padrão: 10.
 
-        Retorna:
-            optimal_k (int): Número ideal de clusters.
+        Returns:
+            optimal_k (int): Número de clusters ideal.
         """
-        max_silhouette = -1
-        optimal_k = 2
-
-        def get_score(data, labels):
-            """
-            Calcula a média de Silhouette score dadas as labels de
-            clusterização do conjunto de dados.
-
-            Argumentos:
-                data (np.ndarray): Dados de entrada.
-                labels (np.ndarray): Labels da clusterização para os
-                    pontos de dados.
-
-            Retorna:
-                (float): Silhouette score médio.
-            """
-            unique_labels = np.unique(labels)
-            silhouettes = []
-            for i, label in enumerate(labels):
-                points_within_cluster = data[labels == label]
-                avg_dist_within_cluster = np.mean(
-                    np.linalg.norm(points_within_cluster - data[i], axis=1)
-                )
-                min_avg_dists = [
-                    np.mean(
-                        np.linalg.norm(data[labels == other_label] - data[i], axis=1)
-                    )
-                    for other_label in unique_labels
-                    if other_label != label
-                ]
-                silhouette_value = (
-                    np.min(min_avg_dists) - avg_dist_within_cluster
-                ) / max(avg_dist_within_cluster, np.min(min_avg_dists))
-                silhouettes.append(silhouette_value)
-            return np.mean(silhouettes)
-
-        for k in range(2, k_max + 1):
+        sum_sq = []
+        for k in range(1, k_max + 1):
             self.k = k
             self.fit(data)
-            silhouette_avg = get_score(data, self.labels)
-            if silhouette_avg > max_silhouette:
-                max_silhouette = silhouette_avg
-                optimal_k = k
+            inertia = np.sum(
+                [
+                    np.linalg.norm(data[i] - self.centroids[self.labels[i]]) ** 2
+                    for i in range(len(data))
+                ]
+            )
+            sum_sq.append(inertia)
+        diffs = np.diff(sum_sq, 2)
+        optimal_k = np.argmin(diffs) + 1
         return optimal_k
 
     def _single_run(self, data: np.ndarray) -> Tuple[np.ndarray, np.ndarray, float]:
@@ -186,29 +154,91 @@ class KMeans:
         anomalies = data[dist > threshold]
         return anomalies
 
+    def get_labels(self, data: np.ndarray) -> np.ndarray:
+        """
+        Atribui cada ponto de dado ao centroide mais próximo para
+        determinar seu cluster.
 
-def run_kmeans(group: pd.DataFrame, num_var: str) -> pd.DataFrame:
+        Argumento:
+            data (np.ndarray): Conjunto de dados.
+
+        Retorna:
+            labels (np.ndarray): Array de labels de cluster
+                correspondentes a cada ponto de dado.
+        """
+        dist = np.linalg.norm(data[:, np.newaxis] - self.centroids, axis=2)
+        labels = np.argmin(dist, axis=1)
+        return labels
+
+
+class Score:
     """
-    Executa o algoritmo de K-Means em CNPJ único e adiciona informações
-    sobre quais valores são observados como anomalias e quantos k foram
-    usados para obter tal resultado.
-
-    Argumentos:
-        group (pd.DataFrame): Grupo de CNPJs elegíveis para o algoritmo.
-        num_var (str): Nome da variável numérica sobre a qual o
-            algoritmo será rodado.
-
-    Retorna:
-        (pd.DataFrame): Dataframe com os dados originais e as colunas
-            'Anomalia' (com valor 0 para não anomalia e 1 para anomalia)
-            e 'k' (o número ideal de clusters usados pelo K-Means).
+    Cálculo de scoring para algoritmo de clusterização.
     """
-    kmeans = KMeans()
-    data = group[num_var].values.reshape(-1, 1)
-    k_optimal = kmeans.get_optimal_k(data)
-    kmeans.k = k_optimal
-    kmeans.fit(data)
-    anomalies = kmeans.detect(data).flatten()
-    group["Anomalia"] = group[num_var].isin(anomalies).astype(int)
-    group["k"] = k_optimal
-    return group
+
+    @staticmethod
+    def silhouette(data: np.ndarray, labels: np.ndarray) -> float:
+        """
+        Calcula o Silhouette Score.
+
+        Argumentos:
+            data (np.ndarray): Dados de entrada.
+            labels (np.ndarray): Atribuições de cluster para cada ponto
+                de dado.
+
+        Retorna:
+            float: Silhouette Score calculado.
+        """
+        unique_labels = np.unique(labels)
+        silhouette_vals = []
+
+        for index, label in enumerate(labels):
+            same_cluster = data[labels == label]
+            a = np.mean(np.linalg.norm(same_cluster - data[index], axis=1))
+            other_clusters = [
+                data[labels == other_label]
+                for other_label in unique_labels
+                if other_label != label
+            ]
+            b_vals = [
+                np.mean(np.linalg.norm(cluster - data[index], axis=1))
+                for cluster in other_clusters
+            ]
+            b = min(b_vals)
+            silhouette_vals.append((b - a) / max(a, b))
+
+        return np.mean(silhouette_vals)
+
+    @staticmethod
+    def daviesbouldin(data: np.ndarray, labels: np.ndarray) -> float:
+        """
+        Calcula o Davies-Bouldin Score.
+
+        Argumentos:
+            data (np.ndarray): Dados de entrada.
+            labels (np.ndarray): Atribuições de cluster para cada ponto
+                de dado.
+
+        Returns:
+            float: Davies-Bouldin Score calculado.
+        """
+        unique_labels = np.unique(labels)
+        centroids = np.array(
+            [data[labels == label].mean(axis=0) for label in unique_labels]
+        )
+        avg_dist_within_cluster = np.array(
+            [
+                np.mean(
+                    np.linalg.norm(data[labels == label] - centroids[label], axis=1)
+                )
+                for label in unique_labels
+            ]
+        )
+        centroid_dist = np.linalg.norm(centroids[:, np.newaxis] - centroids, axis=2)
+        np.fill_diagonal(centroid_dist, float("inf"))
+
+        cluster_ratios = (
+            avg_dist_within_cluster[:, np.newaxis] + avg_dist_within_cluster
+        ) / centroid_dist
+        max_cluster_ratios = np.max(cluster_ratios, axis=1)
+        return np.mean(max_cluster_ratios)
