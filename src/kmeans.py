@@ -60,13 +60,13 @@ class KMeans:
 
     def get_optimal_k(self, data: np.ndarray, k_max: int = 10) -> int:
         """
-        Aplica método Elbow para obter o número de clsuters ideal.
+        Aplica método Elbow para obter o número de clusters ideal.
 
         Argumentos:
             data (np.ndarray): Dados usados no algoritmo K-Means.
             k_max (int): Número máximo de clusters. Valor-padrão: 10.
 
-        Returns:
+        Retorna:
             optimal_k (int): Número de clusters ideal.
         """
         sum_sq = []
@@ -179,7 +179,7 @@ class Score:
     @staticmethod
     def silhouette(data: np.ndarray, labels: np.ndarray) -> float:
         """
-        Calcula o Silhouette Score.
+        Calcula o score do método da silhueta.
 
         Argumentos:
             data (np.ndarray): Dados de entrada.
@@ -212,14 +212,14 @@ class Score:
     @staticmethod
     def daviesbouldin(data: np.ndarray, labels: np.ndarray) -> float:
         """
-        Calcula o Davies-Bouldin Score.
+        Calcula o índice de Davies-Bouldin.
 
         Argumentos:
             data (np.ndarray): Dados de entrada.
             labels (np.ndarray): Atribuições de cluster para cada ponto
                 de dado.
 
-        Returns:
+        Retorna:
             float: Davies-Bouldin Score calculado.
         """
         unique_labels = np.unique(labels)
