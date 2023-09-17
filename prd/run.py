@@ -52,6 +52,7 @@ resultados_lista = []
 
 # iteração por CNPJ e coleção de despesas
 for cnpj, grupo in groupby(selecao_dados, key=lambda x: x[0]):
+    centroids_list = []
     # conversão para array
     values = np.array([item[1] for item in grupo])
     # obtenção do k ideal
@@ -68,22 +69,27 @@ for cnpj, grupo in groupby(selecao_dados, key=lambda x: x[0]):
     db_score = Score.daviesbouldin(
         values.reshape(-1, 1), kmeans.get_labels(values.reshape(-1, 1))
     )
+    labels = kmeans.get_labels(values.reshape(-1, 1))
+    for value, label in zip(values, labels):
+        centroids_list.append({"centroid": kmeans.centroids[label][0]})
 
+    centroid_idx = 0
     # iteração sobre despesas
     for value in values:
         # atribuição de 1 para anomalia, 0 para não anomalia
         is_anomaly = 1 if value in anomalies_kmeans else 0
-        # adição de resultados na lista
         resultados_lista.append(
             {
                 "CNPJ": cnpj,
                 "Valor_corrigido": value,
                 "Anomalia": is_anomaly,
+                "Centroide": centroids_list[centroid_idx]["centroid"],
                 "Clusters": kmeans.k,
                 "Pontuacao_silhueta": silhouette_score,
                 "Indice_DaviesBouldin": db_score,
             }
         )
+        centroid_idx += 1
 
 # conversão dos resultados em dataframe
 resultados = pd.DataFrame(resultados_lista)
