@@ -269,7 +269,6 @@ class Score:
         # retorna a silhueta média para todos os pontos
         return np.mean(silhouette_vals)
 
-    # Static method to calculate the Davies-Bouldin index.
     @staticmethod
     def daviesbouldin(data: np.ndarray, labels: np.ndarray) -> float:
         """
@@ -281,7 +280,7 @@ class Score:
                 de dado.
 
         Retorna:
-            float: Davies-Bouldin Score calculado.
+            float: valor de Davies-Bouldin calculado.
         """
         # obtém labels únicas
         unique_labels = np.unique(labels)
