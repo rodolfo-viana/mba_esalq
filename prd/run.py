@@ -25,7 +25,7 @@ async def download_xml(year: int, semaphore: asyncio.Semaphore) -> None:
     limiter = AsyncLimiter(1, 0.125)
     USER_AGENT = ""
     headers = {"User-Agent": USER_AGENT}
-    DATA_DIR = os.path.join(os.getcwd(), "data")
+    DATA_DIR = os.path.join(os.getcwd(), "../data")
     if not os.path.exists(DATA_DIR):
         os.mkdir(DATA_DIR)
     url = f"https://www.al.sp.gov.br/repositorioDados/deputados/despesas_gabinetes_{str(year)}.xml"
@@ -80,15 +80,15 @@ def parse_data(list_files: List[str]) -> List[Dict[str, Union[str, None]]]:
 # executa `fetch_expenses` no período de 2013 a 2022
 asyncio.run(fetch_expenses(2013, 2022))
 # observa se há o diretório `data`
-if os.path.exists(os.path.join(os.getcwd(), "data")):
+if os.path.exists(os.path.join(os.getcwd(), "../data")):
     # acessa diretório
-    os.chdir("data")
+    os.chdir("../data")
     # lista arquivos xml
     files = glob.glob("*.xml")
     # interpreta os arquivos
     load = parse_data(files)
     # armazena os dados na variável `despesas`
-    despesas = pd.DataFrame.from_dict(load, dtype={"Matricula": str, "CNPJ": str})
+    despesas = pd.DataFrame.from_dict(load)
 # leitura dos data de IPCA
 ipca = pd.read_csv("../data/ipca.csv")
 # conversão da variável Data para datetime
@@ -111,7 +111,9 @@ data = pd.merge(left=despesas, right=ipca, on="Data", how="inner")
 data["Valor_ref"] = ipca[ipca["Data"] == "2022-12-01"]["Valor"].values[0]
 # cálculo da deflação
 data["Valor_corrigido"] = round(
-    (data["Valor_ref"] / data["Valor_y"]) * data["Valor_x"], 2
+    (data["Valor_ref"].astype(float) / data["Valor_y"].astype(float))
+    * data["Valor_x"].astype(float),
+    2,
 )
 # remoção de variáveis desnecessárias
 data = data[["CNPJ", "Valor_corrigido"]]
@@ -128,7 +130,6 @@ kmeans = KMeans()
 selecao_dados = sorted(zip(data["CNPJ"], data["Valor_corrigido"]), key=lambda x: x[0])
 # lista vazia para resultados finais
 resultados_lista = []
-
 # iteração por CNPJ e coleção de despesas
 for cnpj, grupo in groupby(selecao_dados, key=lambda x: x[0]):
     # lista vazia de centroides
@@ -175,7 +176,6 @@ for cnpj, grupo in groupby(selecao_dados, key=lambda x: x[0]):
         )
         # incremento do contador
         centroid_idx += 1
-
 # conversão dos resultados em dataframe
 resultados = pd.DataFrame(resultados_lista)
 # salvamento como csv
